@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type SerializerFunc func(builder ISerializer) ISerializer
+
 type ISerializable interface {
 	Serialize(builder ISerializer) ISerializer
 }
@@ -126,12 +128,16 @@ func (this SerializerToMap) DoTime(keyName string, fieldName string, required bo
 	return this
 }
 
-func ToMap(serializable ISerializable) map[string]interface{} {
+func ToMapWithFunc(item interface{}, serializerFunc SerializerFunc) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	serialier := SerializerToMap{result: result, errors: make(map[string]error), item: serializable}
+	serialier := SerializerToMap{result: result, errors: make(map[string]error), item: item}
 
-	serialier = serializable.Serialize(serialier).(SerializerToMap)
+	serializerFunc(serialier)
 
 	return result
+}
+
+func ToMap(serializable ISerializable) map[string]interface{} {
+	return ToMapWithFunc(serializable, serializable.Serialize)
 }
