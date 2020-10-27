@@ -1,0 +1,5 @@
+- [ ] Implement ALL Types
+- [ ] Implement DoTypeFunc
+- [ ] implement Parsing
+- [ ] Implement Validation rules
+- [ ] Documentation
