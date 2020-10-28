@@ -1,8 +1,10 @@
-package cerealbox
+package tests
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ocomsoft/cerealbox"
+	validation "github.com/ocomsoft/cerealbox/validation"
 	"os"
 	"testing"
 	"time"
@@ -15,10 +17,10 @@ type Example struct {
 	Hide        bool
 }
 
-func (this Example) Serialize(builder ISerializer) ISerializer {
-	return builder.DoString("name", "Name", true, StringVal().MinLength(0).MaxLength(255)).
-		DoInt("age", "Age", true, IntVal().Min(0).Max(255)).
-		DoTime("date_of_birth", "DateOfBirth", true, TimeVal()).
+func (this Example) Serialize(builder cerealbox.ISerializer) cerealbox.ISerializer {
+	return builder.DoString("name", "Name", true, validation.StringVal().MinLength(0).MaxLength(255)).
+		DoInt("age", "Age", true, validation.IntVal().Min(0).Max(255)).
+		DoTime("date_of_birth", "DateOfBirth", true, validation.TimeVal()).
 		DoBool("hidden", "Hide", true)
 }
 
@@ -31,7 +33,7 @@ func TestISerializableBasic(t *testing.T) {
 		Hide:        false}
 
 	enc := json.NewEncoder(os.Stdout)
-	err := enc.Encode(ToMap(&example))
+	err := enc.Encode(cerealbox.ToMap(&example))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -44,13 +46,13 @@ func TestWithFunc(t *testing.T) {
 		DateOfBirth: time.Now(),
 		Hide:        false}
 
-	serializerFunc := func(builder ISerializer) ISerializer {
-		return builder.DoString("name", "Name", true, StringVal().MinLength(0).MaxLength(255)).
+	serializerFunc := func(builder cerealbox.ISerializer) cerealbox.ISerializer {
+		return builder.DoString("name", "Name", true, validation.StringVal().MinLength(0).MaxLength(255)).
 			DoInt("age", "Age", true, nil)
 	}
 
 	enc := json.NewEncoder(os.Stdout)
-	err := enc.Encode(ToMapWithFunc(&example, serializerFunc))
+	err := enc.Encode(cerealbox.ToMapWithFunc(&example, serializerFunc))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
