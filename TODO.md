@@ -3,3 +3,28 @@
 - [ ] implement Parsing
 - [ ] Implement Validation rules
 - [ ] Documentation
+
+- [ ] Types to do
+    - [ ] null.Time/sql.Time...
+    - [x] bool    
+    - [x] string    
+    - [ ] int  
+    - [ ] int8  
+    - [ ] int16  
+    - [ ] int32  
+    - [x] int64
+    - [ ] uint 
+    - [ ] uint8 
+    - [ ] uint16 
+    - [ ] uint32 
+    - [ ] uint64 
+    - [ ] uintptr    
+    - [ ] byte     
+    - [ ] rune     
+    - [ ] float32
+    - [x] float64    
+    - [ ] complex64 
+    - [ ] complex128
+    - [ ] ForeignKey
+    - [ ] ManyToMany - slice...
+    - [ ] null.* Types??
