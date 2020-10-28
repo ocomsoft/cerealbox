@@ -8,8 +8,8 @@ func TestFromMapWithFunc(t *testing.T) {
 	example := Example{}
 
 	serializerFunc := func(builder ISerializer) ISerializer {
-		return builder.DoString("name", "Name", true, 0, 255).
-			DoInt("age", "Age", true, 0, 100).
+		return builder.DoString("name", "Name", true, StringVal().MinLength(0).MaxLength(255)).
+			DoInt("age", "Age", true, IntVal().Min(0).Max(255)).
 			DoBool("hidden", "Hide", true)
 	}
 

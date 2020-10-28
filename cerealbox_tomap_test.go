@@ -16,9 +16,9 @@ type Example struct {
 }
 
 func (this Example) Serialize(builder ISerializer) ISerializer {
-	return builder.DoString("name", "Name", true, 0, 255).
-		DoInt("age", "Age", true, 0, 100).
-		DoTime("date_of_birth", "DateOfBirth", true, nil, nil).
+	return builder.DoString("name", "Name", true, StringVal().MinLength(0).MaxLength(255)).
+		DoInt("age", "Age", true, IntVal().Min(0).Max(255)).
+		DoTime("date_of_birth", "DateOfBirth", true, TimeVal()).
 		DoBool("hidden", "Hide", true)
 }
 
@@ -45,8 +45,8 @@ func TestWithFunc(t *testing.T) {
 		Hide:        false}
 
 	serializerFunc := func(builder ISerializer) ISerializer {
-		return builder.DoString("name", "Name", true, 0, 255).
-			DoInt("age", "Age", true, 0, 100)
+		return builder.DoString("name", "Name", true, StringVal().MinLength(0).MaxLength(255)).
+			DoInt("age", "Age", true, nil)
 	}
 
 	enc := json.NewEncoder(os.Stdout)

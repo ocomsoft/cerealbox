@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-func (this SerializerToMap) DoString(keyName string, fieldName string, required bool, minLength int, maxLength int) ISerializer {
+func (this SerializerToMap) DoString(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	fv, err := this.getFieldValue(fieldName)
 	if err != nil {
 		this.errors[fieldName] = err
@@ -21,7 +21,7 @@ func (this SerializerToMap) DoString(keyName string, fieldName string, required 
 	return this
 }
 
-func (this SerializerFromMap) DoString(keyName string, fieldName string, required bool, minLength int, maxLength int) ISerializer {
+func (this SerializerFromMap) DoString(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	if val, ok := this.jsonmap[keyName]; ok {
 		fv, err := this.getFieldValue(fieldName)
 		if err != nil {
@@ -36,4 +36,63 @@ func (this SerializerFromMap) DoString(keyName string, fieldName string, require
 	}
 
 	return this
+}
+
+type StringValFunc func(string) error
+
+type StringValidation struct {
+	rules []StringValFunc
+}
+
+func StringVal() StringValidation {
+	result := StringValidation{
+		rules: make([]StringValFunc, 0, 0),
+	}
+
+	return result
+}
+
+func (this StringValidation) Validate(val interface{}) []error {
+	results := make([]error, 0, 0)
+
+	for _, f := range this.rules {
+		str := val.(string)
+
+		result := f(str)
+		if result != nil {
+			results = append(results, result)
+		}
+	}
+
+	return results
+}
+
+func (this StringValidation) MinLength(minLength int) StringValidation {
+	this.rules = append(this.rules, func(s string) error {
+		if len(s) < minLength {
+			return errors.New("MinLength")
+		}
+
+		return nil
+	})
+
+	return this // so we can chain them
+}
+
+func (this StringValidation) MaxLength(maxLength int) StringValidation {
+	this.rules = append(this.rules, func(s string) error {
+		if len(s) > maxLength {
+			return errors.New("maxLength")
+		}
+
+		return nil
+	})
+
+	return this // so we can chain them
+}
+
+func (this StringValidation) Func(valFunc StringValFunc) StringValidation {
+	this.rules = append(this.rules, valFunc)
+
+	return this // so we can chain them
 }

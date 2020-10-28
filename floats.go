@@ -6,7 +6,7 @@ import (
 	"reflect"
 )
 
-func (this SerializerFromMap) DoFloat64(keyName string, fieldName string, required bool, min float64, max float64) ISerializer {
+func (this SerializerFromMap) DoFloat64(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	if val, ok := this.jsonmap[keyName]; ok {
 		fv, err := this.getFieldValue(fieldName)
 		if err != nil {
@@ -23,7 +23,7 @@ func (this SerializerFromMap) DoFloat64(keyName string, fieldName string, requir
 	return this
 }
 
-func (this SerializerFromMap) DoFloat32(keyName string, fieldName string, required bool, min float64, max float64) ISerializer {
+func (this SerializerFromMap) DoFloat32(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	if val, ok := this.jsonmap[keyName]; ok {
 		fv, err := this.getFieldValue(fieldName)
 		if err != nil {
@@ -40,7 +40,7 @@ func (this SerializerFromMap) DoFloat32(keyName string, fieldName string, requir
 	return this
 }
 
-func (this SerializerToMap) DoFloat64(keyName string, fieldName string, required bool, min float64, max float64) ISerializer {
+func (this SerializerToMap) DoFloat64(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	fv, err := this.getFieldValue(fieldName)
 	if err != nil {
 		this.errors[fieldName] = err
@@ -55,7 +55,7 @@ func (this SerializerToMap) DoFloat64(keyName string, fieldName string, required
 	return this
 }
 
-func (this SerializerToMap) DoFloat32(keyName string, fieldName string, required bool, min float64, max float64) ISerializer {
+func (this SerializerToMap) DoFloat32(keyName string, fieldName string, required bool, validator IValidator) ISerializer {
 	fv, err := this.getFieldValue(fieldName)
 	if err != nil {
 		this.errors[fieldName] = err
