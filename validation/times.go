@@ -1,4 +1,4 @@
-package cerealbox
+package validation
 
 import (
 	"errors"
