@@ -17,4 +17,5 @@ type ISerializer interface {
 	DoString(string, string, bool, IValidator) ISerializer
 	DoInt(string, string, bool, IValidator) ISerializer
 	DoTime(string, string, bool, IValidator) ISerializer
+	DoSlice(string, string) ISerializer
 }
