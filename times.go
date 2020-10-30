@@ -3,6 +3,7 @@ package cerealbox
 import (
 	"errors"
 	"fmt"
+	"github.com/guregu/null"
 	"reflect"
 	"time"
 )
@@ -15,7 +16,14 @@ func (this SerializerToMap) DoTime(keyName string, fieldName string, required bo
 		if fv.Kind() != reflect.Struct && fv.Type() == reflect.TypeOf(time.Time{}) {
 			this.errors[fieldName] = fmt.Errorf("%s is not a Time field", fieldName)
 		} else {
-			this.result[keyName] = fv.Interface().(time.Time)
+			switch v := fv.Interface().(type) {
+			default:
+				this.errors[fieldName] = fmt.Errorf("%s is not a Time field", fieldName)
+			case time.Time:
+				this.result[keyName] = v
+			case null.Time:
+				this.result[keyName] = v
+			}
 		}
 	}
 
