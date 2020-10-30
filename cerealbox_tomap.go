@@ -15,13 +15,23 @@ type SerializerToMap struct {
 func (this SerializerToMap) getFieldValue(fieldName string) (reflect.Value, error) {
 	/* Get the Field value from the Struct by Name */
 
-	rv := reflect.ValueOf(this.item)
-	if rv.Kind() != reflect.Ptr || rv.Elem().Kind() != reflect.Struct {
-		return reflect.Value{}, errors.New("item must be pointer to struct")
+	var rv reflect.Value
+
+	switch v := this.item.(type) {
+	default:
+		rv = reflect.ValueOf(this.item)
+	case reflect.Value:
+		rv = v
 	}
 
-	// Dereference pointer
-	rv = rv.Elem()
+	if rv.Kind() == reflect.Ptr {
+		// Dereference pointer
+		rv = rv.Elem()
+	}
+
+	if rv.Kind() != reflect.Struct {
+		return reflect.Value{}, errors.New("item must be pointer to struct")
+	}
 
 	// Lookup field by name
 	fv := rv.FieldByName(fieldName)
@@ -31,7 +41,7 @@ func (this SerializerToMap) getFieldValue(fieldName string) (reflect.Value, erro
 
 	// Field must be exported
 	if !fv.CanSet() {
-		return reflect.Value{}, fmt.Errorf("cannot get field %s", fieldName)
+		return reflect.Value{}, fmt.Errorf("cannot set field %s", fieldName)
 	}
 
 	return fv, nil
@@ -47,6 +57,45 @@ func ToMapWithFunc(item interface{}, serializerFunc SerializerFunc) map[string]i
 	return result
 }
 
-func ToMap(serializable ISerializable) map[string]interface{} {
-	return ToMapWithFunc(serializable, serializable.Serialize)
+func ToMap(item interface{}) map[string]interface{} {
+	serializable, ok := item.(ISerializable)
+	if ok {
+		return ToMapWithFunc(item, serializable.Serialize)
+	} else {
+		val, ok := item.(reflect.Value)
+
+		serializable, ok := val.Interface().(ISerializable)
+
+		if ok {
+			return ToMapWithFunc(item, serializable.Serialize)
+		}
+	}
+
+	return nil
+}
+
+func ToSliceWithFunc(items interface{}, serializerFunc SerializerFunc) []map[string]interface{} {
+	s := reflect.ValueOf(items)
+
+	result := make([]map[string]interface{}, s.Len())
+
+	for i := 0; i < s.Len(); i++ {
+		item := s.Index(i)
+		result[i] = ToMapWithFunc(item, serializerFunc)
+	}
+
+	return result
+}
+
+func ToSlice(items interface{}) []map[string]interface{} {
+	s := reflect.ValueOf(items)
+
+	result := make([]map[string]interface{}, s.Len())
+
+	for i := 0; i < s.Len(); i++ {
+		item := s.Index(i)
+		result[i] = ToMap(item)
+	}
+
+	return result
 }
