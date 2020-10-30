@@ -45,10 +45,11 @@ func (this SerializerToMap) DoFloat64(keyName string, fieldName string, required
 	if err != nil {
 		this.errors[fieldName] = err
 	} else {
-		if fv.Kind() != reflect.Float64 {
-			this.errors[fieldName] = fmt.Errorf("%s is not a Float64 field", fieldName)
-		} else {
-			this.result[keyName] = fv.Float()
+		switch v := fv.Interface().(type) {
+		default:
+			this.errors[fieldName] = fmt.Errorf("%s is not an Float field", fieldName)
+		case float32, float64:
+			this.result[keyName] = v
 		}
 	}
 

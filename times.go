@@ -19,9 +19,7 @@ func (this SerializerToMap) DoTime(keyName string, fieldName string, required bo
 			switch v := fv.Interface().(type) {
 			default:
 				this.errors[fieldName] = fmt.Errorf("%s is not a Time field", fieldName)
-			case time.Time:
-				this.result[keyName] = v
-			case null.Time:
+			case time.Time, null.Time:
 				this.result[keyName] = v
 			}
 		}

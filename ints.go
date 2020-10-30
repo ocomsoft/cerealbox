@@ -3,7 +3,6 @@ package cerealbox
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strconv"
 )
 
@@ -13,10 +12,13 @@ func (this SerializerToMap) DoInt(keyName string, fieldName string, required boo
 	if err != nil {
 		this.errors[fieldName] = err
 	} else {
-		if fv.Kind() != reflect.Int {
+		switch v := fv.Interface().(type) {
+		default:
 			this.errors[fieldName] = fmt.Errorf("%s is not an int field", fieldName)
-		} else {
-			this.result[keyName] = fv.Int()
+		case int, int8, int16, int32, int64:
+			this.result[keyName] = v
+		case uint, uint8, uint16, uint32, uint64:
+			this.result[keyName] = v
 		}
 	}
 
