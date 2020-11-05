@@ -2,6 +2,7 @@ package validation
 
 import (
 	"errors"
+	"regexp"
 )
 
 type StringValFunc func(string) error
@@ -49,6 +50,23 @@ func (this StringValidation) MaxLength(maxLength int) StringValidation {
 	this.rules = append(this.rules, func(s string) error {
 		if len(s) > maxLength {
 			return errors.New("maxlength")
+		}
+
+		return nil
+	})
+
+	return this // so we can chain them
+}
+
+func (this StringValidation) Email() StringValidation {
+	var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+	this.rules = append(this.rules, func(s string) error {
+		if len(s) < 3 && len(s) > 254 {
+			return errors.New("email")
+		}
+		if !emailRegex.MatchString(s) {
+			return errors.New("email")
 		}
 
 		return nil
