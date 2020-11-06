@@ -3,6 +3,7 @@ package cerealbox
 import (
 	"errors"
 	"fmt"
+	"github.com/guregu/null"
 	"reflect"
 )
 
@@ -14,7 +15,11 @@ func (this SerializerToMap) DoString(keyName string, fieldName string, required 
 		if fv.Kind() != reflect.String && required {
 			this.addError(keyName, fmt.Errorf("%s is not a String field", fieldName))
 		} else {
-			this.result[keyName] = fv.String()
+			if required {
+				this.result[keyName] = fv.String()
+			} else {
+				this.result[keyName] = fv.Interface() //null.String
+			}
 		}
 	}
 
@@ -27,7 +32,17 @@ func (this SerializerFromMap) DoString(keyName string, fieldName string, require
 		if err != nil {
 			this.addError(keyName, err)
 		} else {
-			fv.SetString(val.(string))
+			if fv.CanSet() {
+				if required {
+					fv.SetString(val.(string))
+				} else {
+					if val == nil {
+						fv.Set(reflect.ValueOf(null.NewString("", false)))
+					} else {
+						fv.Set(reflect.ValueOf(null.StringFrom(val.(string))))
+					}
+				}
+			}
 		}
 	} else {
 		if required {
