@@ -3,13 +3,27 @@ package cerealbox
 import (
 	"errors"
 	"fmt"
+	"github.com/ocomsoft/cerealbox/validation"
 	"reflect"
 )
 
 type SerializerToMap struct {
 	result map[string]interface{}
-	errors map[string]error
+	errors validation.ValidationErrors
 	item   interface{}
+}
+
+func (this SerializerToMap) addError(keyName string, err error) {
+	if this.errors == nil {
+		this.errors = make(validation.ValidationErrors)
+	}
+
+	keyErrors, exist := this.errors[keyName]
+	if !exist {
+		keyErrors = make([]error, 0, 0)
+	}
+
+	this.errors[keyName] = append(keyErrors, err)
 }
 
 func (this SerializerToMap) getFieldValue(fieldName string) (reflect.Value, error) {
@@ -50,7 +64,7 @@ func (this SerializerToMap) getFieldValue(fieldName string) (reflect.Value, erro
 func ToMapWithFunc(item interface{}, serializerFunc SerializerFunc) map[string]interface{} {
 	result := make(map[string]interface{})
 
-	serialier := SerializerToMap{result: result, errors: make(map[string]error), item: item}
+	serialier := SerializerToMap{result: result, errors: make(validation.ValidationErrors), item: item}
 
 	serializerFunc(serialier)
 

@@ -3,13 +3,27 @@ package cerealbox
 import (
 	"errors"
 	"fmt"
+	"github.com/ocomsoft/cerealbox/validation"
 	"reflect"
 )
 
 type SerializerFromMap struct {
 	jsonmap map[string]interface{}
-	errors  map[string]error
+	errors  validation.ValidationErrors
 	item    interface{}
+}
+
+func (this SerializerFromMap) addError(keyName string, err error) {
+	if this.errors == nil {
+		this.errors = make(validation.ValidationErrors)
+	}
+
+	keyErrors, exist := this.errors[keyName]
+	if !exist {
+		keyErrors = make([]error, 0, 0)
+	}
+
+	this.errors[keyName] = append(keyErrors, err)
 }
 
 func (this SerializerFromMap) getFieldValue(fieldName string) (reflect.Value, error) {
@@ -37,14 +51,27 @@ func (this SerializerFromMap) getFieldValue(fieldName string) (reflect.Value, er
 	return fv, nil
 }
 
-func FromMapWithFunc(item interface{}, jsonmap map[string]interface{}, serializerFunc SerializerFunc) interface{} {
-	serialier := SerializerFromMap{jsonmap: jsonmap, errors: make(map[string]error), item: item}
+func FromMapWithFunc(item interface{}, jsonmap map[string]interface{}, serializerFunc SerializerFunc) (interface{}, validation.ValidationErrors) {
+	serialier := SerializerFromMap{jsonmap: jsonmap, errors: make(validation.ValidationErrors), item: item}
 
 	serializerFunc(serialier)
 
-	return item
+	return item, serialier.errors
 }
 
-func FromMap(serializable ISerializable, jsonmap map[string]interface{}) interface{} {
-	return FromMapWithFunc(serializable, jsonmap, serializable.Serialize)
+func FromMap(item interface{}, jsonmap map[string]interface{}) (interface{}, validation.ValidationErrors) {
+	serializable, ok := item.(ISerializable)
+	if ok {
+		return FromMapWithFunc(item, jsonmap, serializable.Serialize)
+	} else {
+		val, ok := item.(reflect.Value)
+
+		serializable, ok := val.Interface().(ISerializable)
+
+		if ok {
+			return FromMapWithFunc(item, jsonmap, serializable.Serialize)
+		}
+	}
+
+	return nil, nil
 }
