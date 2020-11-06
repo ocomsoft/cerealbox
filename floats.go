@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/guregu/null"
+	"github.com/ocomsoft/cerealbox/helper"
 	"reflect"
 )
 
@@ -54,15 +55,21 @@ func (this SerializerFromMap) DoFloat64(keyName string, fieldName string, requir
 			this.addError(keyName, err)
 		} else {
 			if fv.CanSet() {
-				if required {
-					fv.SetFloat(val.(float64))
-				} else {
-					if val == nil {
-						fv.Set(reflect.ValueOf(null.NewFloat(0, false)))
-					} else {
-						fv.Set(reflect.ValueOf(null.FloatFrom(val.(float64))))
-					}
+				convertedValue, isNull, err := helper.ConvertToFloat64(val, !required)
+				if err != nil {
+					this.addError(keyName, err)
 				}
+
+				if required && isNull {
+					this.addError(keyName, errors.New("required"))
+				}
+
+				if required {
+					fv.SetFloat(convertedValue)
+				} else {
+					fv.Set(reflect.ValueOf(null.NewFloat(convertedValue, isNull)))
+				}
+
 			}
 		}
 	} else {
@@ -81,15 +88,21 @@ func (this SerializerFromMap) DoFloat32(keyName string, fieldName string, requir
 			this.addError(keyName, err)
 		} else {
 			if fv.CanSet() {
-				if required {
-					fv.SetFloat(val.(float64))
-				} else {
-					if val == nil {
-						fv.Set(reflect.ValueOf(null.NewFloat(0, false)))
-					} else {
-						fv.Set(reflect.ValueOf(null.FloatFrom(val.(float64))))
-					}
+				convertedValue, isNull, err := helper.ConvertToFloat32(val, !required)
+				if err != nil {
+					this.addError(keyName, err)
 				}
+
+				if required && isNull {
+					this.addError(keyName, errors.New("required"))
+				}
+
+				if required {
+					fv.SetFloat(float64(convertedValue))
+				} else {
+					fv.Set(reflect.ValueOf(null.NewFloat(float64(convertedValue), isNull)))
+				}
+
 			}
 		}
 	} else {
