@@ -52,7 +52,7 @@ func (this SerializerFromMap) getFieldValue(fieldName string) (reflect.Value, er
 }
 
 func FromMapWithFunc(item interface{}, jsonmap map[string]interface{}, serializerFunc SerializerFunc) (interface{}, validation.ValidationErrors) {
-	serialier := SerializerFromMap{jsonmap: jsonmap, errors: make(validation.ValidationErrors), item: item}
+	serialier := SerializerFromMap{jsonmap: jsonmap, errors: make(validation.ValidationErrors), item: &item}
 
 	serializerFunc(serialier)
 
